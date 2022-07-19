@@ -16,8 +16,8 @@ def send_welcome(message):
 
     print(message.text)
     print(message.chat)
-    print(type(message.chat.id))
-    print(message.chat.first_name)
+    print(vars(message))
+    print(type(vars(message.chat)))
     bot.reply_to(message, f"ciao ragazzi!!! {message.chat.first_name}")
 
 
