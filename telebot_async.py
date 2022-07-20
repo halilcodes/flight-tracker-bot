@@ -58,7 +58,7 @@ async def get_eur_flights(message):
 
 @bot.message_handler(commands=['iata'])
 async def iata_handler(message):
-    pass
+    await bot.set_chat_menu_button()
 
 
 @bot.message_handler(commands=["europehelp"])
