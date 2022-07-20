@@ -57,7 +57,8 @@ class FlightHandler:
         pprint.pprint(response.json())
         return response.json()
 
-    def search_flight_eur(self, first_date=15, last_date=45, min_stay=2, max_stay=4, num=3, direct_flight=True):
+    def search_flight_eur(self, first_date=15, last_date=45, min_stay=2, max_stay=4, num=3, direct_flight=True,
+                          currency="TRY"):
         start_search = (datetime.today() + timedelta(days=first_date)).strftime("%d/%m/%Y")
         end_search = (datetime.today() + timedelta(days=last_date)).strftime("%d/%m/%Y")
         endpoint = f"{self.base_endpoint}/search"
@@ -70,7 +71,7 @@ class FlightHandler:
         params['nights_in_dst_to'] = max_stay
         params['one_for_city'] = 1
         params['adults'] = 2
-        params['curr'] = "TRY"
+        params['curr'] = currency.upper().strip()
         params['conn_on_diff_airport'] = 0
         params['ret_from_diff_airport'] = 0
         params['ret_to_diff_airport'] = 0
@@ -82,9 +83,37 @@ class FlightHandler:
 
         response = requests.get(url=endpoint, params=params, headers=self.header)
         if response.status_code == 200:
-            print("request is OK!")
-        pprint.pprint(response.json())
-        return response.json()
+            return response.json()
+        else:
+            return None
+
+
+def display_results(search_data):
+    results = []
+    fx_rate = search_data['fx_rate']
+    data = search_data['data']
+    for i, plane in enumerate(data):
+        link = plane['deep_link']
+        price = float(plane['price'])
+        departure_airline = plane['airlines']
+        home = f"{plane['cityFrom']} / {plane['countryFrom']['name']}"
+        departure_date = datetime.fromtimestamp(plane['route'][0]['dTime'])
+        departure_duration = plane["fly_duration"]
+        destination = f"{plane['cityTo']} / {plane['countryTo']['name']}"
+        stay_nights = plane['nightsInDest']
+        return_airline = plane['route'][1]['airline']
+        return_date = datetime.fromtimestamp(plane['route'][1]['dTime'])
+        return_duration = plane['return_duration']
+
+        current = f"""
+        OPTION NUMBER {i + 1}: {price} TRY
+        From: {home} to {destination} for {stay_nights} nights:
+        Departure: {departure_date} -- duration: {departure_duration} -- airline: {departure_airline}
+        Return: {return_date} -- duretion: {return_duration} -- airline: {return_airline}
+        Link: {link}
+        """
+        results.append(current)
+    return results
 
 
 if __name__ == '__main__':
@@ -92,6 +121,11 @@ if __name__ == '__main__':
     # flight.search_city("amsterdam")
     # flight.get_where_to_go("ankara_tr")
     # flight.get_tophashtags("berlin")
-    flight.search_flight_eur(direct_flight=False)
+    europe_flights = flight.search_flight_eur(direct_flight=True)
+    pprint.pprint(europe_flights)
+    print("*" * 20)
+    for each in display_results(europe_flights):
+        print(each)
+        print("*" * 20)
 
 
