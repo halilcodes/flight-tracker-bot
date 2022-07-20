@@ -37,7 +37,7 @@ def europe_command_handler(message):
     length = len(message.text.split(" "))
     if length == 1:
         get_eur_flights(message)
-    elif "=" not in parameters.all():   # buggy
+    elif any(["=" not in bo for bo in parameters]):
         bot.reply_to(message, "Incorrect syntax. Please check /europehelp")
     else:
         bot.reply_to(message, "We're working on modified searches")
